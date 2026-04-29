@@ -29,20 +29,27 @@ client = OpenAI()
 class AskRequest(BaseModel):
     query: str                                                                                                                                                                                                   
                   
-class AskResponse(BaseModel):               
-    answer: str                         
+class AskResponse(BaseModel):
+    answer: str
+    sources: list[str]
+    chunks: list[dict]
 
-@app.post("/ask", response_model=AskResponse)                                                                                                                                                                    
+@app.post("/ask", response_model=AskResponse)
 async def ask(request: AskRequest):
-    chunks = retrieve(request.query, state["chunks"], state["index"], state["model"])                                                                                                                            
+    chunks = retrieve(request.query, state["chunks"], state["index"], state["model"])
     context = "\n\n".join(c["text"] for c in chunks)
-                                              
+    sources = list(dict.fromkeys(c["file_name"] for c in chunks))
+
     response = client.chat.completions.create(
-        model="gpt-4o-mini",                                                                                                                                                                                     
-        messages=[                                                                                                                                                                                               
-              {"role": "system", "content": "You are a Yettel customer support assistant. Answer based only on the provided context."},                                                                            
-              {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {request.query}"}                                                                                                                     
-          ]                               
-      )                                                                                                                                                                                                            
-                                                                                                                                                                                                               
-    return AskResponse(answer=response.choices[0].message.content)  
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are a Yettel customer support assistant. Answer based only on the provided context."},
+            {"role": "user", "content": f"Context:\n{context}\n\nQuestion: {request.query}"}
+        ]
+    )
+
+    return AskResponse(
+        answer=response.choices[0].message.content,
+        sources=sources,
+        chunks=chunks
+    )
