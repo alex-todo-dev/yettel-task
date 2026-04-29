@@ -1,26 +1,26 @@
 # Yettel AI Assistant — Project Checklist
 
 ## Setup
-- [ ] Create project structure and folders
-- [ ] Create `requirements.txt`
-- [ ] Create `.env.example`
+- [x] Create project structure and folders
+- [x] Create `requirements.txt`
+- [x] Create `.env.example`
 
 ## Implementation
-- [ ] `app/data_loader.py` — load PDFs, extract text, split into chunks
-- [ ] `app/rag_engine.py` — embeddings (sentence-transformers), FAISS vector store, retrieve()
-- [ ] `app/api.py` — FastAPI, POST /ask endpoint
-- [ ] Choose and integrate LLM
+- [x] `app/data_loader.py` — load PDFs, extract text, split into chunks
+- [x] `app/rag_engine.py` — embeddings (sentence-transformers), FAISS vector store, retrieve()
+- [x] `app/api.py` — FastAPI, POST /ask endpoint
+- [x] Choose and integrate LLM
 
 ## Documentation
-- [ ] `README.md` — setup instructions, curl example, Solution Design section
-- [ ] Solution Design: Approach & Choices
-- [ ] Solution Design: Challenges & Limitations
-- [ ] Solution Design: Potential Improvements
+- [x] `README.md` — setup instructions, curl example, Solution Design section
+- [x] Solution Design: Approach & Choices
+- [x] Solution Design: Challenges & Limitations
+- [x] Solution Design: Potential Improvements
 
 ## Bonus
-- [ ] `Dockerfile`
+- [x] `Dockerfile`
 
 ## Testing
-- [ ] Run API locally
-- [ ] Test queries against Yettel PDFs
-- [ ] Verify answers are relevant
+- [x] Run API locally
+- [x] Test queries against Yettel PDFs
+- [x] Verify answers are relevant
