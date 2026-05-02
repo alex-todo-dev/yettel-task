@@ -21,14 +21,26 @@ cp .env.example .env
 uvicorn app.api:app --reload
 ```
 
-## Docker (Optional)
+5. Start the Gradio chat interface (in a separate terminal):
+```bash
+python gradio_app.py
+```
 
-Build and run with Docker:
+Open `http://localhost:7860` in your browser to use the chat UI.
+
+## Docker
+
+Build and run both the API and the Gradio interface in a single container:
 
 ```bash
-docker build -t yettel-assistant .
-docker run -p 8000:8000 --env-file .env yettel-assistant
+docker build -t yettel-rag .
+docker run -p 8000:8000 -p 7860:7860 --env-file .env yettel-rag
 ```
+
+| Service | URL |
+|---|---|
+| REST API | http://localhost:8000 |
+| Gradio Chat UI | http://localhost:7860 |
 
 ## Example Query
 
@@ -61,7 +73,18 @@ Response:
 
 ### Potential Improvements
 
-- **Persistent index**: Save the FAISS index and embeddings to disk so startup is instant. Rebuild only when documents change.
+**Data & Indexing**
+- **Persistent index**: Save the FAISS index and embeddings to disk so startup is instant. Add a checksum or timestamp so the index auto-invalidates when source files change.
+- **Decoupled reindex**: Split data loading from the app startup. A background job (cron or Celery) rebuilds the index and hot-swaps it in without downtime. The API keeps serving the old index until the new one is ready.
+- **Upload endpoint**: Add a `POST /sources` endpoint to upload new PDF documents. It saves the file and triggers a reindex job, returning immediately without blocking the API.
+- **Chunk overlap**: Some answers span section boundaries. 50–100 token overlap on the current 500-token chunks would reduce missed context.
+
+**Retrieval Quality**
+- **Reranking**: After FAISS retrieves the top-k candidates, run a cross-encoder (e.g. `cross-encoder/ms-marco-MiniLM`) to reorder results by relevance before sending to the LLM. Meaningfully improves answer quality with modest latency cost.
 - **Hybrid retrieval**: Combine semantic search (FAISS) with keyword search (BM25) for better coverage of exact-match queries.
-- **Chunk overlap**: Some answers span section boundaries. Adding overlap between chunks would reduce missed context.
-- **Streaming responses**: Stream the LLM response back to the client for faster perceived latency.
+
+**API & Backend**
+- **Streaming responses**: Use `stream=True` on the OpenAI call and Server-Sent Events on the FastAPI side. Gradio supports streaming natively — significant UX improvement for long answers.
+- **"I don't know" fallback**: If no chunks pass the distance threshold, return a canned response instead of sending empty context to the LLM. Prevents hallucination on out-of-scope questions.
+- **Conversation history**: The API currently has no memory between turns. Pass the conversation history in the request and include it in the OpenAI messages array for proper multi-turn support.
+- **Health and metrics endpoints**: Expose `/health` and `/metrics` with index size, number of documents, and last reindex timestamp. Cheap to add and useful for monitoring.
