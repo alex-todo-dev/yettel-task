@@ -11,9 +11,9 @@ A RAG-based AI assistant for Yettel customer support agents. Answers questions a
 pip install -r requirements.txt
 ```
 
-3. Create a `.env` file from the example and add your OpenAI API key:
+3. Export your OpenAI API key:
 ```bash
-cp .env.example .env
+export OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 4. Start the API server:
@@ -34,7 +34,7 @@ Build and run both the API and the Gradio interface in a single container:
 
 ```bash
 docker build -t yettel-rag .
-docker run -p 8000:8000 -p 7860:7860 --env-file .env yettel-rag
+docker run -p 8000:8000 -p 7860:7860 -e OPENAI_API_KEY=your_openai_api_key_here yettel-rag
 ```
 
 | Service | URL |
